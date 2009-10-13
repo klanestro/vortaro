@@ -1,5 +1,5 @@
 import settings
-from words.models import *
+from vortaro.words.models import *
 import sqlite3
 conn = sqlite3.connect('words.sqlite')
 c = conn.cursor()
