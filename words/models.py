@@ -22,6 +22,14 @@ class DictionaryKey(Model):
 	def __unicode__(self):
 		return self.code
 
+# Name of every language in every language
+class LanguageName(Model):
+	text = CharField(max_length=30)
+	name_of = ForeignKey(LanguageKey,related_name="names")
+	name_in = ForeignKey(LanguageKey,related_name="language_names")
+	def __unicode__(self):
+		return self.name_in.code + "-" + self.name_of.code + ": " + self.text
+	
 # Names of lexical categories in every language
 # Ideally it is the set (LanguageKey x CategoryKey)
 class Category(Model):
