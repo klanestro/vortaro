@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/home/boroninh/vortaro/media/'}),
-    (r'^ajax_lookup$', 'vortaro.words.views.ajax'),
+    (r'^ajax/$', 'vortaro.words.views.ajax'),
     #(r'^$', 'vortaro.words.views.dictionary'),
     #(r'^(?P<lang>\w*)/$', 'vortaro.words.views.dictionary'),
     #(r'^(?P<lang>\w*)/search$', 'vortaro.words.views.search'),
