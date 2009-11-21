@@ -11,7 +11,7 @@
 		<div id="languages">
 		{{ lang.available_languages }}:
 		{% for code, name in lang.languages %}
-		{% ifequal code lang.lang %}{{ name }}{% else %}<a href="/{{ code }}">{{ name }}</a>{% endifequal %}{% if forloop.last %}.{% else %},{% endif %}
+		{% ifequal code lang.lang %}{{ name }}{% else %}<a href="/{{ code }}/{{ url_minus_language }}">{{ name }}</a>{% endifequal %}{% if forloop.last %}.{% else %},{% endif %}
 		{% endfor %}
 		</div>
 		<!--<p style="font-size:30px;line-height:32px;">Vortaro</p>-->

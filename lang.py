@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from UserDict import DictMixin
+from vortaro.words.models import *
 
 class _dict(DictMixin):
 	def __init__(self,lang):
@@ -24,3 +25,27 @@ class _dict(DictMixin):
 	def languages(self):
 		return zip(self.langs, self.langnames)
 		
+def eo(word, lang):
+	#lang = LanguageKey.objects.get(code=lang)
+	
+	def find(word):
+		w = Word.objects.filter(text=word,language=lang)
+		if w: return w[0]
+	
+	# Without modification
+	w = find(word)
+	if w: return w
+	
+	# Try without plural and accusative
+	if word.endswith('n') or word.endswith('j') or word.endswith('jn'):
+		w = find(word.rstrip('jn'))
+		if w: return w
+	
+	# Verbs
+	ends = ['as','is','os','us','u']
+	for end in ends:
+		if word.endswith(end):
+			w = find(word[:-len(end)] + 'i')
+			if w: return w
+	
+	return None
