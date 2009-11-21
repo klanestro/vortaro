@@ -152,7 +152,7 @@ def findword(type, body, endlist=None):
 
 def look(w):
 	import sqlite3
-	conn = sqlite3.connect('/home/boroninh/libraro/words.sqlite')
+	conn = sqlite3.connect(ROOT_FOLDER+'/words.sqlite')
 	cursor = conn.cursor()
 	cursor.execute("select * from words where eo like ?", (w,))
 	result = cursor.fetchone()
@@ -196,7 +196,7 @@ def doword(word):
 	text = ""
 	if defs:
 		for d in defs:
-			definition = ", ".join(d[1].split("|"))
+			definition = (", ".join(d[1].split("|"))).strip()
 			text += "<b>%s</b>: %s<br/>" % (d[0], definition)
 		text = text[:-5]
 	else:
