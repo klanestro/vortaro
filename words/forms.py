@@ -60,3 +60,8 @@ class SettingsForm(forms.Form):
 class LoginForm(forms.Form):
 	email = forms.EmailField(max_length=100)
 	password = forms.CharField(max_length=30,widget=forms.PasswordInput)
+	
+class WordForm(forms.Form):
+	language = LanguageField(queryset=LanguageKey.objects.all())
+	full = forms.CharField(max_length=70,required=False)
+	id = forms.IntegerField(widget=forms.HiddenInput,required=False)

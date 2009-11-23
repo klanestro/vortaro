@@ -4,10 +4,25 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
+from django.http import Http404
 
 from vortaro.words.models import *
 from vortaro.words.emails import *
 from vortaro.words.forms import *
+
+def button(obj):
+	"""
+	Creates an embeddable link button for an object such as Word or Sentence.
+	Takes the object as an argument.
+	"""
+	c = "button"
+	if obj.deleted:
+		c = "button deleted"
+	if isinstance(obj, Word): name = ("word","W")
+	else: return ""
+	return """
+	<span class="%s"><a href="/data/%s/%d">%s%d</a></span>
+	""" % (c, name[0], obj.id, name[1], obj.id)
 
 def messages(request):
 	"""
@@ -103,8 +118,7 @@ def settings(request):
 	"first_name":user.first_name,
 	"last_name":user.last_name,
 	#"language":user.language.id,
-	"languages":[x.id for x in user.languages.all()]
-	})
+	"languages":[x.id for x in user.languages.all()]})
 	return render_to_response("editor/settings.html", {
 	"user":user,
 	"error":error,
@@ -115,8 +129,7 @@ def homeview(request):
 		return HttpResponseRedirect('/login/?next=%s' % request.path)
 	return render_to_response("editor/home.html", {
 	"user":request.user,
-	"message":messages(request)
-	})
+	"message":messages(request)})
 
 def search(request):
 	if not request.user.is_authenticated():
@@ -124,3 +137,59 @@ def search(request):
 	return render_to_response("editor/search.html", {
 	"user":request.user
 	})
+	
+def word(request, id=None):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect('/login/?next=%s' % request.path)
+	form = WordForm()
+	error = ""
+	message = ""
+	# You are requesting to see a word
+	if id != None:
+		word = Word.objects.filter(id=id)
+		if word:
+			form = WordForm({
+				"language":word[0].language.id,
+				"full":word[0].full,
+				"id":word[0].id
+			})
+		else:
+			raise Http404
+	# You are creating or updating a word
+	elif request.POST:
+		form = WordForm(request.POST)
+		if form.is_valid():
+			# You are modifying a word
+			if request.POST["id"] != "":
+				word = Word.objects.filter(id=request.POST["id"])
+				if word:
+					word[0].language = form.cleaned_data["language"]
+					word[0].full = form.cleaned_data["full"]
+					word[0].save()
+					message = "The word was successfully modified"
+				else:
+					# The word was physically deleted as you were editing it
+					error = "The word was physically deleted as you were editing it"
+			# You are creating a word
+			else:
+				# Try to find the word in the database
+				word = Word.objects.filter(
+					language = form.cleaned_data["language"],
+					full = form.cleaned_data["full"])
+				# It already exists!
+				if word:
+					error = "The word already exists here: %s" % button(word[0])
+				# It doesn't exist, create it
+				else:
+					word = Word(
+						language = form.cleaned_data["language"],
+						full = form.cleaned_data["full"])
+					word.save()
+					message = "The word has been successfully created"
+					# Now the form has an id
+					form = WordForm(dict(request.POST.items() + [("id",word.id)]))
+	return render_to_response("editor/word.html", {
+	"error":error,
+	"message":message,
+	"user":request.user,
+	"form":form})

@@ -20,10 +20,10 @@
 		<hr/>
 			<div id="content">
 				{% if error %}
-					<div class="msg_bad"><p>{{ error }}</p></div>
+					<div class="msg_bad"><p>{{ error|safe }}</p></div>
 				{% endif %}
 				{% if message %}
-					<div class="msg_good"><p>{{ message }}</p></div>
+					<div class="msg_good"><p>{{ message|safe }}</p></div>
 				{% endif %}
 				{% block content %}{% endblock %}
 			</div>

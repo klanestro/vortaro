@@ -1,0 +1,15 @@
+{% extends "base_logged_in.html" %}
+
+{% block title %}Word{% endblock %}
+
+{% block content %}
+
+<p>Word</p>
+<form action="/data/word" method="POST">
+<table class="form">
+{{ form }}
+<tr><th></th><td><input type="submit" value="Submit" /></td></tr>
+</table>
+</form>
+
+{% endblock %}

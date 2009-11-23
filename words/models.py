@@ -6,8 +6,10 @@ from django.db import IntegrityError
 # by convention.
 
 
-class Universal:
+class Universal(Model):
 	deleted = BooleanField(default=False)
+	class Meta:
+		abstract = True
 
 # The following have no significant content, used only for matching
 class LanguageKey(Model):
@@ -21,15 +23,15 @@ class LanguageKey(Model):
 		if not name:
 			return self.code
 		return name[0].text
-class CategoryKey(Model, Universal):
+class CategoryKey(Universal):
 	code = CharField(max_length=20,unique=True)
 	def __unicode__(self):
 		return self.code
-class ConnectionKey(Model, Universal):
+class ConnectionKey(Universal):
 	code = CharField(max_length=40,unique=True)
 	def __unicode__(self):
 		return self.code
-class DictionaryKey(Model, Universal): 
+class DictionaryKey(Universal): 
 	code = CharField(max_length=40,unique=True)
 	def __unicode__(self):
 		return self.code
@@ -54,7 +56,7 @@ class Editor(User):
 	languages = ManyToManyField(LanguageKey,related_name="editors_know",null=True)
 
 ## Name of every language in every language
-class LanguageName(Model, Universal):
+class LanguageName(Universal):
 	text = CharField(max_length=30)
 	name_of = ForeignKey(LanguageKey,related_name="names")
 	name_in = ForeignKey(LanguageKey,related_name="language_names")
@@ -63,7 +65,7 @@ class LanguageName(Model, Universal):
 	
 # Names of lexical categories in every language
 # Ideally it is the set (LanguageKey x CategoryKey)
-class CategoryName(Model, Universal):
+class CategoryName(Universal):
 	# Short form, optional
 	short = CharField(max_length=10,null=True)
 	# Long form
@@ -77,7 +79,7 @@ class CategoryName(Model, Universal):
 # hot can be (of temperature), (of taste) or (slang)
 # Each of these meanings must be in every language
 # Ideally this it the set (LanguageKey x ConnectionKey)
-class ConnectionName(Model, Universal):
+class ConnectionName(Universal):
 	# the text
 	text = CharField(max_length=40)
 	# Which meaning? In which language?
@@ -88,7 +90,7 @@ class ConnectionName(Model, Universal):
 
 # Music? Math? Agriculture? Slang?
 # Ideally this it the set (LanguageKey x DictionaryKey)
-class DictionaryName(Model, Universal):
+class DictionaryName(Universal):
 	# the text
 	text = CharField(max_length=40)
 	# Which dictionary? In which language?
@@ -97,15 +99,12 @@ class DictionaryName(Model, Universal):
 	def __unicode__(self):
 		return self.language.code + ": " + self.dictionary.code
 
-class Word(Model, Universal):
-	# Usually this is the word itself, however if it is two words,
-	# the primary one goes here, and the secondary is omitted
-	index = CharField(max_length=70,db_index=True)
+class Word(Universal):
 	# Full representation
 	full = CharField(max_length=70,db_index=True)
 	# Broken apart into morphemes (likely to be used only for
 	# Esperanto)
-	morphemes = CharField(max_length=70)
+	morphemes = CharField(max_length=70,null=True)
 	# The language of the word
 	language = ForeignKey(LanguageKey)
 	# Part of speech
@@ -120,13 +119,8 @@ class Word(Model, Universal):
 			if not con.concept.deleted:
 				c.append(con.concept)
 		return c
-	def save(self, force_insert=False, force_update=False):
-		# Make sure every word is unique
-		if Word.objects.filter(full=self.full, language=self.language):
-			raise IntegrityError, "This word alreay exists"
-		super(Word, self).save(force_insert, force_update)
 
-class Definition(Model, Universal):
+class Definition(Universal):
 	# Full representation
 	full = CharField(max_length=70,db_index=True)
 	# The language of the definition
@@ -140,7 +134,7 @@ class Definition(Model, Universal):
 			raise IntegrityError, "This definition alreay exists"
 		super(Definition, self).save(force_insert, force_update)
 
-class Concept(Model, Universal):
+class Concept(Universal):
 	# The big list of words in each language
 	words = ManyToManyField(Word, related_name="concepts")
 	# Music? Math? Economics?
@@ -155,7 +149,7 @@ class Concept(Model, Universal):
 		return c
 
 # A connection between a concept and a word
-class ConceptConnection(Model, Universal):
+class ConceptConnection(Universal):
 	word = ForeignKey(Word,related_name="concept_connections")
 	concept = ForeignKey(Word,related_name="word_connections")
 	# slang? archaic?
@@ -167,17 +161,17 @@ class ConceptConnection(Model, Universal):
 	clarification_before = BooleanField(default=False)
 
 # A connection between a word and its derivative
-class WordConnection(Model, Universal):
+class WordConnection(Universal):
 	word = ForeignKey(Word, related_name="derivatives")
 	derivative = ForeignKey(Word, related_name="derived_from")
 
-class Example(Model, Universal):
+class Example(Universal):
 	# Example for this concept 
 	concept = ForeignKey(Concept,related_name="examples")
 
 # Every example must have equal sentences in many languages
 # each of these sentences deserves a database row
-class Sentence(Model, Universal):
+class Sentence(Universal):
 	# The sentence body
 	text = CharField(max_length=100)
 	# In which language?

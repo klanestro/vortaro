@@ -110,3 +110,11 @@ div.msg_bad{
 	line-height:20px;
 	background-color:#f4a0a8;
 }
+span.button{
+	background-color:#ffdc79;
+	padding-left:5px;
+	padding-right:5px;
+}
+span.deleted{
+	background-color:#cccccc;
+}
