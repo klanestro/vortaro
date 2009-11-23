@@ -12,6 +12,11 @@ def setup():
 	f.write('ROOT_FOLDER = "' + dir + '/vortaro/"')
 	f.write("\n")
 	f.close()
+	print ""
+	print "Please note that while DEBUG is set to True all"
+	print "emails will not be sent, but will be displayed"
+	print "in the terminal as the development server is running"
+	print ""
 	if confirm("Do you want to run the Django server?"):
 		os.system("python manage.py runserver")
 	else:
