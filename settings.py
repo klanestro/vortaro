@@ -85,3 +85,47 @@ INSTALLED_APPS = (
 	'vortaro.words',
 	'django.contrib.admin',
 )
+
+
+AUTHENTICATION_BACKENDS = (
+    'vortaro.auth_backends.CustomUserModelBackend',
+)
+
+CUSTOM_USER_MODEL = 'words.Editor'
+
+EMAIL_HOST = "mail.vortaro.co.cc"
+EMAIL_PORT = 26
+EMAIL_HOST_USER = "noreply@vortaro.co.cc"
+EMAIL_HOST_PASSWORD = "crimson"
+
+
+
+
+
+from textwrap import wrap
+class BogusSMTPConnection(object):
+	"""Instead of sending emails, print them to the console."""
+ 
+	def __init__(*args, **kwargs):
+		print("Initialized bogus SMTP connection")
+ 
+	def open(self):
+		print("Open bogus SMTP connection")
+ 
+	def close(self):
+		print("Close bogus SMTP connection")
+ 
+	def send_messages(self, messages):
+		print("Sending through bogus SMTP connection:")
+		for message in messages:
+			print("From: %s" % message.from_email)
+			print("To: %s" % ", ".join(message.to))
+			print("Subject: %s" % message.subject)
+			print("%s" % "\n".join(wrap(message.body)))
+			print(messages)
+			return len(messages)
+
+if DEBUG:
+	from django.core import mail
+	mail.SMTPConnection = BogusSMTPConnection
+

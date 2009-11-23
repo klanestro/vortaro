@@ -4,23 +4,26 @@
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 		<title>{% block title %}Vortaro{% endblock %}</title>
 		<link rel="stylesheet" type="text/css" href="/media/style.css" />
-		<!--<link rel="icon" type="image/png" href="/media/favicon.png" />-->
 	</head>
 	<body>
 		<div id="center">
-		<div id="languages">
-		{{ lang.available_languages }}:
-		{% for code, name in lang.languages %}
-		{% ifequal code lang.lang %}{{ name }}{% else %}<a href="/{{ code }}/{{ url_minus_language }}">{{ name }}</a>{% endifequal %}{% if forloop.last %}.{% else %},{% endif %}
-		{% endfor %}
-		</div>
-		<!--<p style="font-size:30px;line-height:32px;">Vortaro</p>-->
+			<div id="login_menu_bar">
+			{% if user.is_authenticated %}
+				<a href="/logout">Log out</a>&nbsp;&nbsp;&nbsp;<a href="/home/settings">Settings</a>
+			{% else %}
+				<a href="/register">Register</a>&nbsp;&nbsp;&nbsp;<a href="/login">Login</a>
+			{% endif %}
+			</div>
 		<div id="menu_bar">
-			<a{% ifequal active_tab 'dictionary' %} class="active"{% endifequal %} href="/{{ lang.lang }}">{{ lang.menu_dictionary }}</a>&nbsp;
-			<a{% ifequal active_tab 'project' %} class="active"{% endifequal %} href="/{{ lang.lang }}">{{ lang.menu_project }}</a>&nbsp;
+			<a href="/about">About</a>
 		</div>
 		<hr/>
-			{% block content %}{{ content|safe }}{% endblock %}
+			<div id="content">
+				{% block content %}{% endblock %}
+			</div>
+			<div id="sidebar">
+				{% block sidebar %}{% endblock %}
+			</div>
 		</div>
 	</body>
 </html>

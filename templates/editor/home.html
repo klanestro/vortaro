@@ -1,0 +1,14 @@
+{% extends "base_logged_in.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+{% if message %}
+	<div class="msg_good"><p>{{ message }}</p></div>
+{% endif %}
+
+<p>Home</p>
+
+
+{% endblock %}

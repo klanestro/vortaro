@@ -15,7 +15,9 @@ class LanguageKey(Model):
 	def __unicode__(self):
 		return self.code
 	def getname(self,key):
-		name = self.names.filter(name_in= key)
+		if not isinstance(key, LanguageKey):
+			key = LanguageKey.objects.get(code=key)
+		name = self.names.filter(name_in=key)
 		if not name:
 			return self.code
 		return name[0].text
@@ -48,8 +50,8 @@ Universal.commits = ManyToManyField(Commit,null=True)
 
 class Editor(User):
 	commits = ManyToManyField(Commit,null=True)
-	language = ForeignKey(LanguageKey,related_name="editors_prefer")
-	languages = ForeignKey(LanguageKey,related_name="editors_know")
+	language = ForeignKey(LanguageKey,related_name="editors_prefer",null=True)
+	languages = ManyToManyField(LanguageKey,related_name="editors_know",null=True)
 
 ## Name of every language in every language
 class LanguageName(Model, Universal):
@@ -136,7 +138,7 @@ class Definition(Model, Universal):
 		if Definition.objects.filter(full=self.full,
 				language=self.language):
 			raise IntegrityError, "This definition alreay exists"
-		super(Person, self).save(force_insert, force_update)
+		super(Definition, self).save(force_insert, force_update)
 
 class Concept(Model, Universal):
 	# The big list of words in each language

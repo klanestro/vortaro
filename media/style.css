@@ -14,10 +14,18 @@ img{
 #center{
 	position:absolute;
 	left:50%;
-	width:600px;
-	margin-left:-300px;
+	width:800px;
+	margin-left:-400px;
 	background-color:#ffffff;
 	min-height:500px;
+}
+#content{
+	width:500px;
+	float:left;
+}
+#sidebar{
+	width:290px;
+	float:right;
 }
 #languages{
 	height:15px;
@@ -48,7 +56,11 @@ a{
 a:hover{
 	text-decoration:underline;
 }
-
+#login_menu_bar{
+	height:20px;
+	font-size:14px;
+	text-align:right;
+}
 #menu_bar{
 	margin-top:20px;
 	font-size:18px;
@@ -68,4 +80,33 @@ a:hover{
 }
 select{
 	position:inline;
+}
+table.form{
+	width:90%
+}
+table.form th{
+	text-align:right;
+	width:150px;
+	vertical-align:top;
+}
+table.form input[type=text]{
+	width:100%;
+}
+table.form input[type=password]{
+	width:100%;
+}
+table.form select{
+	width:100%;
+}
+div.msg_good{
+	padding-left:5px;
+	height:20px;
+	line-height:20px;
+	background-color:#b6dda8;
+}
+div.msg_bad{
+	padding-left:5px;
+	height:20px;
+	line-height:20px;
+	background-color:#f4a0a8;
 }

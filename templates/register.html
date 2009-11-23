@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+
+	{% if sent %}
+		<p>An email to {{ email }} has been sent.</p>
+	{% else %}
+		{% if error %}
+			<p>{{ error }}</p>
+		{% endif %}
+		<form action="/register/" method="POST">
+		<label for="email">Email:</label><input type="text" name="email" />
+		<input type="submit" value="Submit" />
+		</form>
+	{% endif %}
+
+{% endblock %}

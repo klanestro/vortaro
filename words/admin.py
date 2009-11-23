@@ -1,5 +1,6 @@
 from vortaro.words.models import *
 from django.contrib import admin
+admin.site.register(LanguageKey)
 """
 admin.site.register(LanguageKey)
 admin.site.register(CategoryKey)
