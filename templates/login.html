@@ -4,15 +4,11 @@
 
 {% block content %}
 
-
-{% if error %}
-	<p>{{ error }}</p>
-{% endif %}
-<form action="/login/" method="POST">
-<label for="email">Email:</label><input type="text" name="email" value="{{ email }}" /><br/>
-<label for="password">Password:</label><input type="password" name="password" /><br/>
-<input type="submit" value="Submit" />
-</form>
-
+	<form action="/login/" method="POST">
+	<table class="form">
+	{{ form }}
+	<tr><th></th><td><input type="submit" value="Login" /></td></tr>
+	</table>
+	</form>
 
 {% endblock %}

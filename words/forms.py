@@ -1,8 +1,5 @@
 from django import forms
 from vortaro.words.models import *
-
-class RegisterForm(forms.Form):
-	email = forms.EmailField(max_length=100)
 	
 class ManyLanguagesField(forms.ModelMultipleChoiceField):
 	def label_from_instance(self, obj):
@@ -11,6 +8,17 @@ class ManyLanguagesField(forms.ModelMultipleChoiceField):
 class LanguageField(forms.ModelChoiceField):
 	def label_from_instance(self, obj):
 		return obj.getname("eng")
+
+class RegisterForm(forms.Form):
+	email = forms.EmailField(max_length=100)
+	def clean(self):
+		if "email" not in self.cleaned_data:
+			return self.cleaned_data
+		try:
+			old_user = Editor.objects.get(email=self.cleaned_data["email"])
+			raise forms.ValidationError("A user with this email already exists")
+		except Editor.DoesNotExist:
+			return self.cleaned_data
 
 class SettingsForm(forms.Form):
 	first_name = forms.CharField(max_length=30,required=False)
@@ -48,4 +56,7 @@ class SettingsForm(forms.Form):
 		else:
 			cleaned_data["password"] = p2
 		return cleaned_data
-			
+
+class LoginForm(forms.Form):
+	email = forms.EmailField(max_length=100)
+	password = forms.CharField(max_length=30,widget=forms.PasswordInput)

@@ -86,7 +86,7 @@ table.form{
 }
 table.form th{
 	text-align:right;
-	width:150px;
+	width:auto;
 	vertical-align:top;
 }
 table.form input[type=text]{
@@ -102,7 +102,7 @@ div.msg_good{
 	padding-left:5px;
 	height:20px;
 	line-height:20px;
-	background-color:#b6dda8;
+	background-color:#dbffcf;
 }
 div.msg_bad{
 	padding-left:5px;

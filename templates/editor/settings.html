@@ -4,10 +4,6 @@
 
 {% block content %}
 
-{% if error %}
-	<div class="msg_bad"><p>{{ error }}</p></div>
-{% endif %}
-
 <form action="/home/settings" method="POST">
 <table class="form">
 {{ form }}

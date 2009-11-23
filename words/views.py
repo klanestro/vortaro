@@ -9,63 +9,68 @@ from vortaro.words.models import *
 from vortaro.words.emails import *
 from vortaro.words.forms import *
 
-def email2username(email):
-	return email.replace("@","").replace(".","")[:30]
+def messages(request):
+	"""
+	The GET variable message represents a message about the user's previous
+	action to be shown on the redirected page. This function takes request
+	as an argument and return the full message. If there is nothing, it
+	returns an empty string.
+	"""
+	text = ""
+	if "message" in request.GET:
+		message = request.GET["message"]
+		# If you are redirected here from successfully updating your profile
+		if message == "updated":
+			text = "Profile updated"
+		elif message == "user_created":
+			text = "An email has been sent to %s" % request.GET["email"]
+	return text
 
 def register(request):
-	sent = False
-	error = ""
 	email = ""
 	form = RegisterForm()
 	if request.POST:
 		form = RegisterForm(request.POST)
 		if form.is_valid():
 			email = form.cleaned_data["email"]
-			username = email2username(email)
-			try:
-				old_user = Editor.objects.get(username=username)
-			except Editor.DoesNotExist:
-				old_user = False
-			if old_user:
-				error = "A user with this email already exists."
-			else:
-				password = User.objects.make_random_password(length=10)
-				editor = Editor(email=email,username=username)
-				editor.set_password(password)
-				editor.save()
-				subject = "Thank you for becoming a new vortaro.co.cc editor"
-				body = email_register % (email, password)
-				send_mail(subject, body, 'noreply@vortaro.co.cc',[email],
-				         fail_silently=False)
-				sent = True
-		else:
-			error = "Please enter a valid email"
-		
-	return render_to_response("register.html", {
-	"email":email,
-	"error":error,
-	"sent":sent})
+			# Create username from email
+			username = email.replace("@","").replace(".","")[:30]
+			# Generate a random password
+			password = User.objects.make_random_password(length=10)
+			editor = Editor(email=email,username=username)
+			editor.set_password(password)
+			editor.save()
+			subject = "Thank you for becoming a new vortaro.co.cc editor"
+			body = email_register % (email, password)
+			send_mail(subject, body, 'noreply@vortaro.co.cc',[email],
+				fail_silently=False)
+			return HttpResponseRedirect(
+				"/about?message=user_created&email=%s" % email)
+	return render_to_response("register.html", {"form":form})
 	
 def logmein(request):
-	email = ""
 	error = ""
+	form = LoginForm()
 	if request.POST:
-		email = request.POST['email']
-		password = request.POST['password']
-		user = authenticate(email=email, password=password)
-		if user is not None:
-			if user.is_active:
-				login(request, user)
-				next = "/home"
-				if "next" in request.GET:
-					next = request.GET["next"]
-				return HttpResponseRedirect(next)
+		form = LoginForm(request.POST)
+		if form.is_valid():
+			user = authenticate(
+				email=form.cleaned_data["email"],
+				password=form.cleaned_data["password"]
+			)
+			if user is not None:
+				if user.is_active:
+					login(request, user)
+					next = "/home"
+					if "next" in request.GET:
+						next = request.GET["next"]
+					return HttpResponseRedirect(next)
+				else:
+					error = "This account is disabled."
 			else:
-				error = "This account is disabled."
-		else:
-			error = "Email or password is incorrect."
+				error = "Email or password is incorrect."
 	return render_to_response("login.html", {
-	"email":email,
+	"form":form,
 	"error":error})
 
 def logmeout(request):
@@ -74,7 +79,8 @@ def logmeout(request):
 	
 def about(request):
 	return render_to_response("about.html", {
-	"user":request.user})
+	"message":messages(request),
+	"user":request.user,})
 	
 def settings(request):
 	user = request.user
@@ -107,14 +113,9 @@ def settings(request):
 def homeview(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('/login/?next=%s' % request.path)
-	message = ""
-	if "message" in request.GET:
-		# If you are redirected here from successfully updating your profile
-		if request.GET["message"] == "updated":
-			message = "Profile updated"
 	return render_to_response("editor/home.html", {
 	"user":request.user,
-	"message":message
+	"message":messages(request)
 	})
 
 def search(request):

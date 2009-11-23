@@ -3,17 +3,13 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-
-	{% if sent %}
-		<p>An email to {{ email }} has been sent.</p>
-	{% else %}
-		{% if error %}
-			<p>{{ error }}</p>
-		{% endif %}
-		<form action="/register/" method="POST">
-		<label for="email">Email:</label><input type="text" name="email" />
-		<input type="submit" value="Submit" />
-		</form>
-	{% endif %}
+<p>To become an editor blah blah blah. All you need to register is your email
+address.</p>
+	<form action="/register/" method="POST">
+	<table class="form">
+		{{ form }}
+	<tr><th></th><td><input type="submit" value="Register" /></td></tr>
+	</table>
+	</form>
 
 {% endblock %}

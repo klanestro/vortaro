@@ -19,6 +19,12 @@
 		</div>
 		<hr/>
 			<div id="content">
+				{% if error %}
+					<div class="msg_bad"><p>{{ error }}</p></div>
+				{% endif %}
+				{% if message %}
+					<div class="msg_good"><p>{{ message }}</p></div>
+				{% endif %}
 				{% block content %}{% endblock %}
 			</div>
 			<div id="sidebar">
