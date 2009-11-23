@@ -5,11 +5,16 @@
 {% block content %}
 
 <p>Word</p>
-<form action="/data/word" method="POST">
+<form action="/data/word/modify" method="POST">
 <table class="form">
 {{ form }}
-<tr><th></th><td><input type="submit" value="Submit" /></td></tr>
+<tr><th></th><td><input type="submit" value="Modify" /></td></tr>
 </table>
 </form>
-
+<hr/>
+{% for commit in commits %}
+	<div class="commit">
+	{{ commit.editor }}
+	</div>
+	{% endfor %}
 {% endblock %}

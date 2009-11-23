@@ -26,8 +26,7 @@ urlpatterns = patterns('',
     (r'^home/settings$', 'vortaro.words.views.settings'),
     (r'^data/search$', 'vortaro.words.views.search'),
     
-    (r'^data/word$', 'vortaro.words.views.word'),
-    (r'^data/word/(?P<id>\d+)$', 'vortaro.words.views.word'),
+    (r'^data/word/(?P<command>\w+)$', 'vortaro.words.views.word'),
     
     #(r'^$', 'vortaro.words.views.dictionary'),
     #(r'^(?P<lang>\w*)/$', 'vortaro.words.views.dictionary'),

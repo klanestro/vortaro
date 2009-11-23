@@ -10,36 +10,19 @@ from vortaro.words.models import *
 from vortaro.words.emails import *
 from vortaro.words.forms import *
 
-def button(obj):
-	"""
-	Creates an embeddable link button for an object such as Word or Sentence.
-	Takes the object as an argument.
-	"""
-	c = "button"
-	if obj.deleted:
-		c = "button deleted"
-	if isinstance(obj, Word): name = ("word","W")
-	else: return ""
-	return """
-	<span class="%s"><a href="/data/%s/%d">%s%d</a></span>
-	""" % (c, name[0], obj.id, name[1], obj.id)
-
 def messages(request):
 	"""
-	The GET variable message represents a message about the user's previous
-	action to be shown on the redirected page. This function takes request
-	as an argument and return the full message. If there is nothing, it
-	returns an empty string.
+	Inside the request.session dict are two keys: message and error. This
+	function returns a dict with just the two. It clears the session ones.
 	"""
-	text = ""
-	if "message" in request.GET:
-		message = request.GET["message"]
-		# If you are redirected here from successfully updating your profile
-		if message == "updated":
-			text = "Profile updated"
-		elif message == "user_created":
-			text = "An email has been sent to %s" % request.GET["email"]
-	return text
+	messages = {}
+	if "message" in request.session:
+		messages["message"] = request.session["message"]
+		request.session["message"] = ""
+	if "error" in request.session:
+		messages["error"] = request.session["error"]
+		request.session["error"] = ""
+	return messages
 
 def register(request):
 	email = ""
@@ -59,6 +42,7 @@ def register(request):
 			body = email_register % (email, password)
 			send_mail(subject, body, 'noreply@vortaro.co.cc',[email],
 				fail_silently=False)
+			request.session["message"] = "An email has been sent to %s" % email
 			return HttpResponseRedirect(
 				"/about?message=user_created&email=%s" % email)
 	return render_to_response("register.html", {"form":form})
@@ -94,7 +78,7 @@ def logmeout(request):
 	
 def about(request):
 	return render_to_response("about.html", {
-	"message":messages(request),
+	"messages":messages(request),
 	"user":request.user,})
 	
 def settings(request):
@@ -111,7 +95,8 @@ def settings(request):
 			if form.cleaned_data["password"]:
 				user.set_password(form.cleaned_data["password"])
 			user.save()
-			return HttpResponseRedirect("/home?message=updated")
+			request.session["message"] = "Profile updated"
+			return HttpResponseRedirect("/home")
 		else:
 			error = "Invalid data"
 	form = SettingsForm({
@@ -129,67 +114,66 @@ def homeview(request):
 		return HttpResponseRedirect('/login/?next=%s' % request.path)
 	return render_to_response("editor/home.html", {
 	"user":request.user,
-	"message":messages(request)})
+	"messages":messages(request)})
 
 def search(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('/login/?next=%s' % request.path)
 	return render_to_response("editor/search.html", {
-	"user":request.user
+	"user":request.user,
+	"words":Word.objects.all()
 	})
 	
-def word(request, id=None):
+def word(request, command=None):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('/login/?next=%s' % request.path)
-	form = WordForm()
-	error = ""
-	message = ""
-	# You are requesting to see a word
-	if id != None:
-		word = Word.objects.filter(id=id)
-		if word:
-			form = WordForm({
-				"language":word[0].language.id,
-				"full":word[0].full,
-				"id":word[0].id
-			})
+	editor = request.user
+	# I am strictly creating a word
+	if command == "new":
+		# I want to create a word, give me a form
+		if not request.POST:
+			form = WordForm()
+		# I already entered the fields, create it now
 		else:
-			raise Http404
-	# You are creating or updating a word
-	elif request.POST:
-		form = WordForm(request.POST)
-		if form.is_valid():
-			# You are modifying a word
-			if request.POST["id"] != "":
-				word = Word.objects.filter(id=request.POST["id"])
-				if word:
-					word[0].language = form.cleaned_data["language"]
-					word[0].full = form.cleaned_data["full"]
-					word[0].save()
-					message = "The word was successfully modified"
-				else:
-					# The word was physically deleted as you were editing it
-					error = "The word was physically deleted as you were editing it"
-			# You are creating a word
-			else:
-				# Try to find the word in the database
+			form = WordForm(request.POST)
+			if form.is_valid():
+				# Try to find a duplicate in the database
 				word = Word.objects.filter(
 					language = form.cleaned_data["language"],
 					full = form.cleaned_data["full"])
 				# It already exists!
 				if word:
-					error = "The word already exists here: %s" % button(word[0])
+					request.session["error"] \
+						= "The word already exists here: %s" % word[0].button()
 				# It doesn't exist, create it
 				else:
-					word = Word(
-						language = form.cleaned_data["language"],
-						full = form.cleaned_data["full"])
-					word.save()
-					message = "The word has been successfully created"
-					# Now the form has an id
-					form = WordForm(dict(request.POST.items() + [("id",word.id)]))
+					word = editor.create_word(form.cleaned_data)
+					# Reditect to the newly created word's homepage :)
+					request.session["message"] = "Word successfully created"
+					return HttpResponseRedirect('/data/word/%d' % word.id)
+		return render_to_response("editor/new_word.html", {
+		"messages":messages(request),
+		"user":request.user,
+		"form":form})
+	# I am modifying a word
+	elif command == "modify" and request.POST:
+		form = WordForm(request.POST)
+		word = get_object_or_404(Word, id=request.POST["id"])
+		if form.is_valid():
+			# If changes were made, give a message
+			if editor.modify_word(word, form.cleaned_data):
+				request.session["message"] \
+					= "The word was successfully modified"
+			return HttpResponseRedirect('/data/word/%d' % word.id)
+	# I want to look at a word
+	elif command.isdigit():
+		word = get_object_or_404(Word, id=int(command))
+		form = WordForm(word.values())
+	# I can't understand the command, 404
+	else:
+		raise Http404
 	return render_to_response("editor/word.html", {
-	"error":error,
-	"message":message,
+	"messages":messages(request),
 	"user":request.user,
-	"form":form})
+	"form":form,
+	"commits":Commit.objects.filter(object_id=word.id)})

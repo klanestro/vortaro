@@ -4,7 +4,12 @@
 
 {% block content %}
 
-<p>Search</p>
+<p>Find it yourself!</p>
+<p>
+{% for word in words %}
+{{ word.button|safe }}
+{% endfor %}
+</p>
 
 
 {% endblock %}

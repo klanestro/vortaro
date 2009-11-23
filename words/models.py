@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db.models import *
 from django.db import IntegrityError
+from django.forms.models import model_to_dict
+
 # Everything that goes by the name "code" here is language-
 # independant, it is visible only to programmers and is in English
 # by convention.
@@ -8,6 +10,35 @@ from django.db import IntegrityError
 
 class Universal(Model):
 	deleted = BooleanField(default=False)
+	hidden = BooleanField(default=False)
+	def button(self):
+		"""
+		Returns an HTML representation of the object
+		"""
+		return button(self)
+	def values(self):
+		"""
+		obj.values() is equivalent to model_to_dict(obj). I think that this
+		definitely belongs in the list of standard methods of a Model
+		"""
+		return model_to_dict(self)
+		
+	def backup(self):
+		"""
+		This function is used to create backups. It returns the id of the clone.
+		"""
+		# Get all fields
+		fields = self.__dict__.copy()
+		# Set backup to be hidden
+		fields["hidden"] = True
+		# Get rid of the id and any underscored garbage
+		for key in fields.keys():
+			if key.startswith("_") or key == "id":
+				del fields[key]
+		# Commence cloning...
+		backup = self.__class__(**fields)
+		backup.save()
+		return backup.id
 	class Meta:
 		abstract = True
 
@@ -35,25 +66,6 @@ class DictionaryKey(Universal):
 	code = CharField(max_length=40,unique=True)
 	def __unicode__(self):
 		return self.code
-
-class Commit(Model):
-	when = DateTimeField(auto_now=True)
-	explanation = CharField(max_length=300,null=True)
-	language = ForeignKey(LanguageKey,null=True)
-	request_approval = BooleanField(default=False)
-	# Create, Delete, Modify
-	type = CharField(max_length=1)
-	# If it was modified, here's the backup id
-	backup_id = IntegerField(null=True)
-	anonymous = BooleanField(default=False)
-
-# I have to add it now, otherwise the models wouldn't validate
-Universal.commits = ManyToManyField(Commit,null=True)
-
-class Editor(User):
-	commits = ManyToManyField(Commit,null=True)
-	language = ForeignKey(LanguageKey,related_name="editors_prefer",null=True)
-	languages = ManyToManyField(LanguageKey,related_name="editors_know",null=True)
 
 ## Name of every language in every language
 class LanguageName(Universal):
@@ -100,6 +112,8 @@ class DictionaryName(Universal):
 		return self.language.code + ": " + self.dictionary.code
 
 class Word(Universal):
+	def __unicode__(self):
+		return self.full
 	# Full representation
 	full = CharField(max_length=70,db_index=True)
 	# Broken apart into morphemes (likely to be used only for
@@ -111,8 +125,6 @@ class Word(Universal):
 	category = ForeignKey(CategoryKey,null=True)
 	# Is this an acronym?
 	acronym = BooleanField(default=False)
-	def __unicode__(self):
-		return self.language.code + ": " + self.full
 	def concepts(self):
 		c = []
 		for con in self.concept_connections:
@@ -122,9 +134,9 @@ class Word(Universal):
 
 class Definition(Universal):
 	# Full representation
-	full = CharField(max_length=70,db_index=True)
+	full = CharField(max_length=70,db_index=True,null=True)
 	# The language of the definition
-	language = ForeignKey(LanguageKey)
+	language = ForeignKey(LanguageKey,null=True)
 	def __unicode__(self):
 		return self.language.code + ": " + self.full
 	def save(self, force_insert=False, force_update=False):
@@ -135,8 +147,6 @@ class Definition(Universal):
 		super(Definition, self).save(force_insert, force_update)
 
 class Concept(Universal):
-	# The big list of words in each language
-	words = ManyToManyField(Word, related_name="concepts")
 	# Music? Math? Economics?
 	dictionary = ManyToManyField(DictionaryKey, null=True)
 	# Antonym links to another concept
@@ -187,4 +197,96 @@ class Sentence(Universal):
 			raise IntegrityError, "This sentence alreay exists"
 		super(Person, self).save(force_insert, force_update)
 
+#from vortaro.words.actions import EditorActions
+class Editor(User):
+	language = ForeignKey(LanguageKey,related_name="editors_prefer",null=True)
+	languages = ManyToManyField(LanguageKey,related_name="editors_know",null=True)
+	def __unicode__(self):
+		text = self.first_name + " " + self.last_name
+		text = text.strip()
+		if not text:
+			text = u"Anonymous"
+		return text
+	def _modify(self, obj, newvals):
+		"""
+		Takes any object and a dict of new values and overwrites each. It 
+		ignores values that the object can't take. Returns True if at least
+		one new value was given, otherwise False.
+		"""
+		changed = False
+		for key, val in newvals.items():
+			if key == "id": continue
+			try:
+				if not changed and obj.__getattribute__(key) != val:
+					changed = True
+				obj.__setattr__(key, val)
+			except: pass
+		return changed
 
+	def create_word(self, values):
+		"""
+		Creates a word with given values and returns its instance.
+		"""
+		w = Word()
+		self._modify(w, values)
+		w.save()
+		commit = Commit(
+			editor = self,
+			commit_type = "cw",
+			object_id = w.id)
+		commit.save()
+		return w
+
+	def modify_word(self, word, values, explanation=None, 
+			wait_approval=False):
+		"""
+		Takes an Editor, Word and a dict of values as parameters. Modifies the
+		word, creating a Commit
+		"""
+		# Modify and return False if nothing new was done.
+		if not self._modify(word, values):
+			return False
+		
+		#commit = Commit(
+		#	commit_type = "mw",
+		#	object_id = word.id,
+		#	backup_id = word.backup())
+		
+		word.save()
+		return True
+
+class Commit(Model):
+	when = DateTimeField(auto_now=True)
+	explanation = CharField(max_length=300,null=True)
+	wait_approval = BooleanField(default=False)
+	# Create, Delete, Modify
+	commit_type = CharField(max_length=2)
+	# If it was created or deleted, here's the object id
+	object_id = IntegerField(null=True)
+	# If it was modified, here's the backup id	
+	backup_id = IntegerField(null=True)
+	# Who did it
+	editor = ForeignKey(Editor,related_name="commits")
+	
+# I have to add it now, otherwise the models wouldn't validate
+Universal.commits = ManyToManyField(Commit,null=True)
+
+def button(obj):
+	"""
+	Creates an embeddable link button for an object such as Word or Sentence.
+	Takes the object as an argument.
+	"""
+	c = "button"
+	if obj.deleted:
+		c = "button deleted"
+	if isinstance(obj, Word):
+		name = ("word","W")
+		return """
+		<span class="%s">
+		<span class="button_id" title="#%d">#</span>
+		<a href="/data/word/%d">%s</a></span>
+		""" % (c, obj.id, obj.id, unicode(obj))
+	else: return ""
+	return """
+	<span class="%s"><a href="/data/%s/%d">%s%d</a></span>
+	""" % (c, name[0], obj.id, name[1], obj.id)

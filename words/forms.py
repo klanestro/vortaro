@@ -21,32 +21,34 @@ class RegisterForm(forms.Form):
 			return self.cleaned_data
 
 class SettingsForm(forms.Form):
-	first_name = forms.CharField(max_length=30,required=False)
-	last_name = forms.CharField(max_length=30,required=False)
+	first_name = forms.CharField(
+		max_length = 30,
+		required = False,
+		widget = forms.TextInput(attrs={"autocomplete":"off"}))
+	last_name = forms.CharField(
+		max_length = 30,
+		required = False,
+		widget = forms.TextInput(attrs={"autocomplete":"off"}))
 	#language = LanguageField(
 	#	queryset=LanguageKey.objects.all(),
 	#	label="Preferred language",
 	#	required=False
 	#)
 	languages = ManyLanguagesField(
-		queryset=LanguageKey.objects.all(),
-		label="Working languages",
-		required=False,
-		#widget=forms.CheckboxSelectMultiple,
-		help_text="You can choose multiple languages by holding down the shift key"
-	)
+		queryset = LanguageKey.objects.all(),
+		label = "Working languages",
+		required = False,
+		help_text = "You can choose multiple languages by holding down the shift key")
 	p1 = forms.CharField(
-		max_length=30,
-		required=False,
-		widget=forms.PasswordInput,
-		label="New password",
-	)
+		max_length = 30,
+		required = False,
+		widget = forms.PasswordInput(attrs={"autocomplete":"off"}),
+		label = "New password")
 	p2 = forms.CharField(
-		max_length=30,
-		required=False,
-		widget=forms.PasswordInput,
-		label="Retype",
-	)
+		max_length = 30,
+		required = False,
+		widget = forms.PasswordInput(attrs={"autocomplete":"off"}),
+		label = "Retype")
 	def clean(self):
 		cleaned_data = self.cleaned_data
 		p1 = cleaned_data['p1']
