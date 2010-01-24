@@ -35,6 +35,7 @@ class Node:
 		if verbose: print "add:    " + self.trace()
 		if rest != "":
 			self.search()
+		
 	def gather(self):
 		global morphemes
 		

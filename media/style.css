@@ -19,6 +19,9 @@ img{
 	background-color:#ffffff;
 	min-height:500px;
 }
+#top_bar{
+	text-align:right;
+}
 #content{
 	width:500px;
 	float:left;
@@ -27,12 +30,6 @@ img{
 	width:290px;
 	float:right;
 }
-#languages{
-	height:15px;
-	font-size:12px;
-	line-height:15px;
-}
-
 h1, h2, h3, h4, h5, h6, h7{
 	text-align:left;
 	/*font-variant:small-caps;*/
@@ -55,11 +52,6 @@ a{
 }
 a:hover{
 	text-decoration:underline;
-}
-#login_menu_bar{
-	height:20px;
-	font-size:14px;
-	text-align:right;
 }
 #menu_bar{
 	margin-top:20px;
@@ -123,4 +115,17 @@ span.button_id{
 }
 span.deleted{
 	background-color:#cccccc;
+}
+div.commit{
+	background-color:#c8e7e0;
+	padding:5px;
+	margin-bottom:5px;
+}
+div.commit table td{
+	font-size:12px;
+	font-family:"Andale Mono";
+}
+div.commit table th{
+	text-align:left;
+	font-size:12px;
 }

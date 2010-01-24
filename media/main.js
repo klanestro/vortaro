@@ -26,7 +26,7 @@ $(document).ready(function(){
 		if($(this).html() == "#"){
 			$(this).html($(this).attr("title"));
 		}else{
-			$(this).html("#")
+			//$(this).html("#")
 		}
 	});
 });

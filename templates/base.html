@@ -9,28 +9,41 @@
 	</head>
 	<body>
 		<div id="center">
-			<div id="login_menu_bar">
+		<div id="top_bar">
 			{% if user.is_authenticated %}
-				<a href="/logout">Log out</a>&nbsp;&nbsp;&nbsp;<a href="/home/settings">Settings</a>
+				<a href="/logout">Log out</a> |
+				<a href="{{ user.get_absolute_url }}">My Profile</a> |
+				<a href="/settings">Settings</a>
 			{% else %}
-				<a href="/register">Register</a>&nbsp;&nbsp;&nbsp;<a href="/login">Login</a>
+				<a href="/login">Log in</a> |
+				<a href="/register">Join</a>
 			{% endif %}
-			</div>
+		</div>
 		<div id="menu_bar">
 			<a href="/about">About</a>
 		</div>
 		<hr/>
 			<div id="content">
-				{% if messages.error %}
-					<div class="msg_bad"><p>{{ messages.error|safe }}</p></div>
+				{% if error %}
+					<div class="msg_bad"><p>{{ error|safe }}</p></div>
 				{% endif %}
-				{% if messages.message %}
-					<div class="msg_good"><p>{{ messages.message|safe }}</p></div>
-				{% endif %}
+				{% for message in messages %}
+					<div class="msg_good"><p>{{ message|safe }}</p></div>
+				{% endfor %}
 				{% block content %}{% endblock %}
 			</div>
 			<div id="sidebar">
-				{% block sidebar %}{% endblock %}
+				{% if user.is_authenticated %}
+					<ul>
+						<li><a href="/data/search">Search</a></li>
+						<li><a href="/data/words/new">Add a word</a></li>
+					</ul>
+				{% else %}
+
+				{% endif %}
+		
+				{% block sidebar %}
+				{% endblock %}
 			</div>
 		</div>
 	</body>

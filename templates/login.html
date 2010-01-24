@@ -4,11 +4,11 @@
 
 {% block content %}
 
-	<form action="/login/" method="POST">
-	<table class="form">
-	{{ form }}
-	<tr><th></th><td><input type="submit" value="Login" /></td></tr>
-	</table>
-	</form>
+<form action="/login/" method="POST">
+<table class="form">
+{{ login_form }}
+<tr><th></th><td><input type="submit" value="Login" /></td></tr>
+</table>
+</form>
 
 {% endblock %}
