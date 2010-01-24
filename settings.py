@@ -6,7 +6,7 @@ TEMPLATE_DEBUG = DEBUG
 PROJECT_ROOT = os.path.normpath(os.path.dirname(__file__))
 
 try:
-	from vortaro.local_settings import *
+        from vortaro.local_settings import *
 except ImportError: pass
 
 ADMINS = (
@@ -83,8 +83,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-	'vortaro.words',
-#	'django.contrib.admin',
+        'vortaro.words',
+#       'django.contrib.admin',
 )
 
 
@@ -112,28 +112,28 @@ LOGIN_URL = "/login"
 
 from textwrap import wrap
 class BogusSMTPConnection(object):
-	"""Instead of sending emails, print them to the console."""
+        """Instead of sending emails, print them to the console."""
  
-	def __init__(*args, **kwargs):
-		print("Initialized bogus SMTP connection")
+        def __init__(*args, **kwargs):
+                print("Initialized bogus SMTP connection")
  
-	def open(self):
-		print("Open bogus SMTP connection")
+        def open(self):
+                print("Open bogus SMTP connection")
  
-	def close(self):
-		print("Close bogus SMTP connection")
+        def close(self):
+                print("Close bogus SMTP connection")
  
-	def send_messages(self, messages):
-		print("Sending through bogus SMTP connection:")
-		for message in messages:
-			print("From: %s" % message.from_email)
-			print("To: %s" % ", ".join(message.to))
-			print("Subject: %s" % message.subject)
-			print("%s" % "\n".join(wrap(message.body)))
-			print(messages)
-			return len(messages)
+        def send_messages(self, messages):
+                print("Sending through bogus SMTP connection:")
+                for message in messages:
+                        print("From: %s" % message.from_email)
+                        print("To: %s" % ", ".join(message.to))
+                        print("Subject: %s" % message.subject)
+                        print("%s" % "\n".join(wrap(message.body)))
+                        print(messages)
+                        return len(messages)
 
 if DEBUG:
-	from django.core import mail
-	mail.SMTPConnection = BogusSMTPConnection
+        from django.core import mail
+        mail.SMTPConnection = BogusSMTPConnection
 
