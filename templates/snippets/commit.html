@@ -1,0 +1,9 @@
+<div class="commit">
+	Commit: <a href="{{ commit.editor.get_absolute_url }}">{{ commit.editor }}</a>
+	{{ action }}
+	<table>
+	{% for key, value in info.items %}
+		<tr><th>{{ key }}</th><td>{{ value }}</td></tr>
+	{% endfor %}
+	</table>
+</div>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+
+<form action="/settings" method="POST">
+<table class="form">
+{{ form }}
+<tr><th></th><td><input type="submit" value="Update profile" /></td></tr>
+</table>
+</form>
+
+{% endblock %}

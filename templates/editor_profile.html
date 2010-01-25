@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<p>{{ editor }}</p>
+
+{% if editor.commits %}
+	{% for commit in editor.commits.all %}
+		{{ commit }}
+	{% endfor %}
+{% else %}
+	<p>No commits yet</p>
+{% endif %}
+
+{% endblock %}

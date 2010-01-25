@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Word{% endblock %}
+
+{% block content %}
+
+<p>Word</p>
+<form action="/data/words/new" method="POST">
+<table class="form">
+{{ form }}
+<tr><th></th><td><input type="submit" value="Create" /></td></tr>
+</table>
+</form>
+
+{% endblock %}

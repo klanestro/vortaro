@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<p>Find it yourself!</p>
+<p>
+{% for word in words %}
+{{ word.button|safe }}
+{% endfor %}
+</p>
+
+
+{% endblock %}
