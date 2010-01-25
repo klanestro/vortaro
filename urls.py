@@ -2,7 +2,7 @@ from django.conf.urls.defaults import *
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-from vortaro.settings import ROOT_FOLDER
+from vortaro.settings import PROJECT_ROOT
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -15,7 +15,7 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
-    (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': ROOT_FOLDER+'/media/'}),
+    (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': PROJECT_ROOT+'/media/'}),
     (r'^ajax/epo/eng/(?P<word>[^/]*)/$', 'vortaro.legacy.esperanto.ajax'),
     (r'^register/$', 'vortaro.words.views.register'),
     (r'^login/$', 'vortaro.words.views.logmein'),
