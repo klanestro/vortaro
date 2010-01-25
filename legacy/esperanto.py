@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from vortaro.settings import ROOT_FOLDER
+from vortaro.settings import PROJECT_ROOT 
 from django.http import HttpResponse
 
-roots = set(open(ROOT_FOLDER+'/legacy/roots.txt','r').read().decode('utf-8').strip().split("\n"))
+roots = set(open(PROJECT_ROOT+'/legacy/roots.txt','r').read().decode('utf-8').strip().split("\n"))
 prefixes=[u"ali",u"bo",u"dis",u"ek",u"eks",u"fi",u"ge",u"i",u"ki",u"mal",u"neni",u"pra",u"re",u"ti",u"ĉef",u"ĉi",u"ne"]
 suffixes=set([u"aĵ",u"ar",u"ant",u"ad",u"at",u"aĉ",u"ant",u"an",u"ar",u"ec",u"eg",u"estr",u"et",u"ej",u"ebl",u"em",u"er",u"ent",u"el",u"end",u"ig",u"iĝ",u"ing",u"int",u"ist",u"in",u"iĉ",u"ind",u"il",u"id",u"ism",u"it",u"int",u"obl",u"op",u"ot",u"on",u"ont",u"uj",u"ul",u"um",u"ut",u"unt",u"ĉj"])
 
@@ -21,7 +21,7 @@ def ajax(request, word):
 
 class Node:
     def __init__(self, type, body, rest, parent=False):
-            self.parent = parent
+        self.parent = parent
         self.type = type
         self.body = body
         
@@ -160,7 +160,7 @@ def findword(type, body, endlist=None):
 
 def look(w):
     import sqlite3
-    conn = sqlite3.connect(ROOT_FOLDER+'/legacy/words.sqlite')
+    conn = sqlite3.connect(PROJECT_ROOT+'/legacy/words.sqlite')
     cursor = conn.cursor()
     cursor.execute("select * from words where eo like ?", (w,))
     result = cursor.fetchone()
